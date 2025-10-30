@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36603.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpTcpChatManagerClient", "UdpTcpChatManagerClient\UdpTcpChatManagerClient.csproj", "{E62D4120-772E-46C1-B2EB-8B4C2C8FC333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{F47D6E1E-9807-42DA-AD7C-4A68B3BC239C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E62D4120-772E-46C1-B2EB-8B4C2C8FC333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E62D4120-772E-46C1-B2EB-8B4C2C8FC333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E62D4120-772E-46C1-B2EB-8B4C2C8FC333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E62D4120-772E-46C1-B2EB-8B4C2C8FC333}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F47D6E1E-9807-42DA-AD7C-4A68B3BC239C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F47D6E1E-9807-42DA-AD7C-4A68B3BC239C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F47D6E1E-9807-42DA-AD7C-4A68B3BC239C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F47D6E1E-9807-42DA-AD7C-4A68B3BC239C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35592EC3-454B-4AAD-A313-5C1DF1CCE623}
+	EndGlobalSection
+EndGlobal
