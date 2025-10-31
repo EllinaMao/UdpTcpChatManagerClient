@@ -30,7 +30,7 @@ namespace Client
 
 
             client.MessageGetEvent += OnPublicMessageReceived;
-            client.PMGetEvent += OnPrivateMessageReceived;
+            client.PMGetEvent += PrivateMessageReceived;
 
             // 2. Добавляем недостающие подписки
             client.ClientLogEvent += Client_ClientLogEvent;
@@ -38,6 +38,17 @@ namespace Client
             client.HistoryReceivedEvent += OnHistoryReceived;
             send_btn.Enabled = false;
         }
+
+        private void PrivateMessageReceived(string name, string msg)
+        {
+            // Находим (или создаем) вкладку и ListBox для этого ПМ
+            ListBox pmChatBox = FindOrCreatePmTab(fromUser);
+
+            // Добавляем сообщение
+            pmChatBox.Items.Add($"[{fromUser}]: {msg}");
+            ScrollListBoxToEnd(pmChatBox);
+        }
+
 
 
         private async void connect_btn_Click(object sender, EventArgs e)
@@ -70,6 +81,7 @@ namespace Client
         {
 
         }
+
         private void OnPublicMessageReceived(string name, string msg) 
         {
             mainChatListBox.Items.Add($"{name}: {msg}");
