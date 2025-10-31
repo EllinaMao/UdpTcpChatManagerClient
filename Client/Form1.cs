@@ -9,23 +9,42 @@ namespace Client
         private ClientController client;
 
         private const int UDP_PORT = 8001;
+        private const int TCP_PORT = 8002;
         private readonly string MULTICAST_GROUP = "239.0.0.1";
+        private Dictionary<string, ListBox> _privateChatBoxes = new Dictionary<string, ListBox>();
+
+        public int OnPrivateMessageReceived { get; private set; }
+
         public Form1()
         {
             InitializeComponent();
             _uiContext = SynchronizationContext.Current;
-            textBoxIp.Text = "239.0.0.1";
-            
-        }
-        private void Log(string msg)
-        {
+            textBoxIp.Text = MULTICAST_GROUP;
+
 
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            client = new ClientController(_uiContext);
+
+
+            client.MessageGetEvent += OnPublicMessageReceived;
+            client.PMGetEvent += OnPrivateMessageReceived;
+
+            // 2. Добавляем недостающие подписки
+            client.ClientLogEvent += Client_ClientLogEvent;
+            client.UserListUpdatedEvent += OnUserListUpdated;
+            client.HistoryReceivedEvent += OnHistoryReceived;
+            send_btn.Enabled = false;
+        }
+
+
         private async void connect_btn_Click(object sender, EventArgs e)
         {
             var username = textBoxUsername.Text;
-            await client.ConnectAsync(MULTICAST_GROUP, UDP_PORT, username);
 
+            await client.ConnectAsync(textBoxIp.Text, TCP_PORT, username);
             connect_btn.Enabled = false;
             textBoxUsername.ReadOnly = true;
             send_btn.Enabled = true;
@@ -43,35 +62,48 @@ namespace Client
             }
             catch (Exception ex)
             {
-                listBox1.Items.Add($"[ERROR] Не удалось отправить: {ex.Message}");
+                mainChatListBox.Items.Add($"[ERROR] Не удалось отправить: {ex.Message}");
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void OnPublicMessageReceived(string name, string msg) 
+        {
+            mainChatListBox.Items.Add($"{name}: {msg}");
+            mainChatListBox.TopIndex = mainChatListBox.Items.Count - 1;
+        }
+
+        private void Client_ClientLogEvent(string msg) //
+        {
+            mainChatListBox.Items.Add($"[SYSTEM] {msg}");
+            mainChatListBox.TopIndex = mainChatListBox.Items.Count - 1;
+        }
+
+        private void OnHistoryReceived(List<Logic.MessagesFiles.Message> history)
+        {
+            mainChatListBox.Items.Clear(); 
+            foreach (var msg in history)
+            {
+                mainChatListBox.Items.Add($"{msg.Name}: {msg.Msg}");
+            }
+            mainChatListBox.TopIndex = mainChatListBox.Items.Count - 1;
+        }
+
+        private void OnUserListUpdated(List<string> users)
+        {
+             userListBox.Items.Clear();
+            foreach (var user in users)
+            {
+                userListBox.Items.Add(user);
             }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             client?.Dispose();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            client = new ClientController(_uiContext);
-            
-            client.MessageGetEvent += Client_MessageGetEvent; // Сообщения чата
-            client.ClientLogEvent += Client_ClientLogEvent;   // Системные логи
-            send_btn.Enabled = false;
-        }
-
-        private void Client_ClientLogEvent(string msg)
-        {
-            listBox1.Items.Add($"[SYSTEM] {msg}");
-            // Автопрокрутка вниз
-            listBox1.TopIndex = listBox1.Items.Count - 1;
-        }
-        private void Client_MessageGetEvent(string msg)
-        {
-            listBox1.Items.Add(msg);
-            // Автопрокрутка вниз
-            listBox1.TopIndex = listBox1.Items.Count - 1;
         }
     }
 }

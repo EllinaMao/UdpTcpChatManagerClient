@@ -1,11 +1,8 @@
-﻿using System; // Добавлено
-using System.Collections.Generic; // Добавлено
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json; // Добавлено
-using Logic.MessagesFiles; // Добавлено (убедись, что пространство имен верное)
-using System.IO; // Добавлено
+using System.Text.Json; 
+using Logic.MessagesFiles; 
 
 namespace Logic
 {
@@ -14,22 +11,22 @@ namespace Logic
         private SynchronizationContext ctx;
         private string _userName;
 
-        // --- UDP (для общего чата) ---
+        //UDP
         private UdpClient _udpSender;
         private static readonly IPAddress MulticastGroup = IPAddress.Parse("239.0.0.1");
         private const int MulticastPort = 8001;
         private bool _isUdpListening = false;
 
-        // --- TCP (для управления) ---
+        //TCP
         private TcpClient _tcpClient;
         private NetworkStream _tcpStream;
         private bool _isTcpListening = false;
 
-        // --- События для UI ---
-        public Action<string>? MessageGetEvent; // (Уже было) сообщение участника
-        public Action<string>? ClientLogEvent;  // (Уже было) cообщение сервера
+        //События для UI
+        public Action<string>? MessageGetEvent; // сообщение участника
+        public Action<string>? PMGetEvent; // сообщение участника
+        public Action<string>? ClientLogEvent;  // сообщение сервера
 
-        // --- НОВЫЕ СИСТЕМНЫЕ СОБЫТИЯ ---
         public Action<List<string>>? UserListUpdatedEvent; // Для ListBox'а
         public Action<List<Message>>? HistoryReceivedEvent; // Для чата
 
@@ -43,7 +40,7 @@ namespace Logic
             }
         }
 
-        // --- Логгеры (без изменений) ---
+        //Логгеры
         private void LogSystem(string msg)
         {
             if (ctx != null)
@@ -59,19 +56,27 @@ namespace Logic
             else
                 MessageGetEvent?.Invoke(fullMsg);
         }
+        private void LogPmMessage(string name, string msg)
+        {
+            string fullMsg = $"{name}: {msg}";
+            if (ctx != null)
+                ctx.Post(d => PMGetEvent?.Invoke(fullMsg), null);
+            else
+                PMGetEvent?.Invoke(fullMsg);
+        }
 
-        // --- ОБНОВЛЕННЫЙ МЕТОД ---
+
         public async Task ConnectAsync(string serverIp, int serverTcpPort, string userName)
         {
             _userName = userName;
 
-            // 1. Настраиваем UDP (как и было)
+            // Настраиваем UDP 
             SetupUdp();
             _isUdpListening = true;
             _ = Task.Run(ListenUdpAsync);
             LogSystem("UDP: Слушаем общий чат...");
 
-            // 2. --- НОВОЕ: ПОДКЛЮЧАЕМСЯ ПО TCP ---
+            // Настраиваем TCP 
             try
             {
                 _tcpClient = new TcpClient();
@@ -83,14 +88,14 @@ namespace Logic
                     _tcpStream = _tcpClient.GetStream();
                     LogSystem("TCP: Подключено. Отправляем регистрацию...");
 
-                    // 3. --- НОВОЕ: РЕГИСТРАЦИЯ ---
-                    // Отправляем ConnectMessage, как договорились
+                    // РЕГИСТРАЦИЯ
+                    // Отправляем ConnectMessage
                     var connectMsg = new ConnectMessage { Name = _userName };
                     string json = JsonSerializer.Serialize(connectMsg);
                     byte[] buffer = Encoding.UTF8.GetBytes(json);
                     await _tcpStream.WriteAsync(buffer, 0, buffer.Length);
 
-                    // 4. --- НОВОЕ: ЗАПУСК TCP СЛУШАТЕЛЯ ---
+                    // ЗАПУСК TCP СЛУШАТЕЛЯ
                     _isTcpListening = true;
                     _ = Task.Run(ListenTcpServerAsync);
                 }
@@ -102,8 +107,8 @@ namespace Logic
             }
         }
 
-        // --- НОВЫЙ МЕТОД (Отправка PM) ---
-        // (Вызывать из UI, когда юзер пишет приватное сообщение)
+        // Отправка PM
+        // Вызывать из UI, когда юзер пишет приватное сообщение
         public async Task SendPrivateMessageAsync(string toUser, string message)
         {
             if (_tcpStream == null || !_isTcpListening) return;
@@ -127,7 +132,7 @@ namespace Logic
             }
         }
 
-        // --- (UDP Отправка - без изменений) ---
+        // UDP Отправка
         public async Task SendUpdMessage(string text)
         {
             if (_udpSender == null) return;
@@ -148,7 +153,7 @@ namespace Logic
             }
         }
 
-        // --- НОВЫЙ МЕТОД (TCP Слушатель) ---
+        // TCP Слушатель
         private async Task ListenTcpServerAsync()
         {
             byte[] buffer = new byte[4096];
@@ -165,7 +170,7 @@ namespace Logic
 
                     string serverJson = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-                    // --- НОВОЕ: Логика "подсматривания" ---
+                    //  Логика "подсматривания" 
                     TcpMessage baseMsg = null;
                     try
                     {
@@ -175,13 +180,13 @@ namespace Logic
 
                     if (baseMsg == null) continue;
 
-                    // --- НОВОЕ: Обработка команд от сервера ---
+                    // Обработка команд от сервера 
                     switch (baseMsg.Type)
                     {
                         case "Error":
                             var errorMsg = JsonSerializer.Deserialize<ErrorMessage>(serverJson);
                             LogSystem($"!!! ОШИБКА СЕРВЕРА: {errorMsg.Reason} !!!");
-                            // Сервер сам разорвет соединение, так что выходим
+                            // Сервер сам разорвет соединение
                             break;
 
                         case "UserList":
@@ -193,7 +198,7 @@ namespace Logic
                                 UserListUpdatedEvent?.Invoke(userListMsg.Users);
                             break;
 
-                        case "HistoryMessage": // (Имя типа из твоего класса)
+                        case "HistoryMessage": // (Имя типа из класса сообщения)
                             var historyMsg = JsonSerializer.Deserialize<HistoryMessage>(serverJson);
                             if (historyMsg?.Messages != null)
                             {
@@ -207,7 +212,7 @@ namespace Logic
 
                         case "PrivateMessage":
                             var relayMsg = JsonSerializer.Deserialize<PrivateMessageRelay>(serverJson);
-                            LogMessage($"[PM от {relayMsg.FromUser}]", relayMsg.Message);
+                            LogPmMessage($"[PM от {relayMsg.FromUser}]", relayMsg.Message);
                             break;
                     }
                 }
@@ -223,11 +228,11 @@ namespace Logic
             finally
             {
                 _isTcpListening = false;
-                // (Dispose позаботится о закрытии)
+                // Dispose позаботится о закрытии
             }
         }
 
-        // --- (UDP Слушатель - обновлен) ---
+        // UDP Слушатель 
         private async Task ListenUdpAsync()
         {
             try
@@ -245,13 +250,10 @@ namespace Logic
                         var result = await _udpSender.ReceiveAsync();
                         var json = Encoding.UTF8.GetString(result.Buffer);
 
-                        // (Заменил Message.FromJson на прямой JsonSerializer)
                         var message = JsonSerializer.Deserialize<Message>(json);
 
-                        if (message != null && message.Name != _userName) // Не показывать свои же UDP-сообщения
-                        {
-                            LogMessage(message.Name, message.Msg);
-                        }
+                        LogMessage(message.Name, message.Msg);
+
                     }
                     catch (ObjectDisposedException)
                     {
@@ -274,20 +276,19 @@ namespace Logic
             _udpSender = new UdpClient();
         }
 
-        // --- ОБНОВЛЕННЫЙ МЕТОД ---
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    // --- Остановка UDP ---
+                    // Остановка UDP 
                     _isUdpListening = false;
                     _udpSender?.Close();
                     _udpSender?.Dispose();
                     _udpSender = null;
 
-                    // --- НОВОЕ: Остановка TCP ---
+                    // Остановка TCP 
                     _isTcpListening = false;
                     _tcpStream?.Close();
                     _tcpStream?.Dispose();

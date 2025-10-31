@@ -28,12 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             textBoxIp = new TextBox();
-            listBox1 = new ListBox();
             send_btn = new Button();
             connect_btn = new Button();
             textBoxMessage = new TextBox();
             textBoxUsername = new TextBox();
+            textBox1 = new TextBox();
+            button1 = new Button();
+            userListBox = new ListBox();
+            mainChatListBox = new ListBox();
+            tabControl1 = new TabControl();
+            tabPage1 = new TabPage();
+            tabPage2 = new TabPage();
+            listBox3 = new ListBox();
+            imageList1 = new ImageList(components);
+            systemLogListBox = new ListBox();
+            tabControl1.SuspendLayout();
+            tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
             SuspendLayout();
             // 
             // textBoxIp
@@ -45,20 +58,11 @@
             textBoxIp.Size = new Size(170, 23);
             textBoxIp.TabIndex = 0;
             // 
-            // listBox1
-            // 
-            listBox1.FormattingEnabled = true;
-            listBox1.ItemHeight = 15;
-            listBox1.Location = new Point(24, 56);
-            listBox1.Name = "listBox1";
-            listBox1.Size = new Size(478, 349);
-            listBox1.TabIndex = 2;
-            // 
             // send_btn
             // 
-            send_btn.Location = new Point(400, 415);
+            send_btn.Location = new Point(405, 415);
             send_btn.Name = "send_btn";
-            send_btn.Size = new Size(102, 23);
+            send_btn.Size = new Size(63, 23);
             send_btn.TabIndex = 3;
             send_btn.Text = "Send";
             send_btn.UseVisualStyleBackColor = true;
@@ -66,7 +70,7 @@
             // 
             // connect_btn
             // 
-            connect_btn.Location = new Point(412, 12);
+            connect_btn.Location = new Point(451, 12);
             connect_btn.Name = "connect_btn";
             connect_btn.Size = new Size(90, 23);
             connect_btn.TabIndex = 4;
@@ -78,31 +82,131 @@
             // 
             textBoxMessage.Location = new Point(24, 415);
             textBoxMessage.Name = "textBoxMessage";
-            textBoxMessage.Size = new Size(370, 23);
+            textBoxMessage.Size = new Size(375, 23);
             textBoxMessage.TabIndex = 5;
             // 
             // textBoxUsername
             // 
-            textBoxUsername.Location = new Point(200, 12);
+            textBoxUsername.Location = new Point(300, 12);
             textBoxUsername.Name = "textBoxUsername";
-            textBoxUsername.Size = new Size(206, 23);
+            textBoxUsername.Size = new Size(145, 23);
             textBoxUsername.TabIndex = 6;
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(200, 12);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(94, 23);
+            textBox1.TabIndex = 7;
+            // 
+            // button1
+            // 
+            button1.Location = new Point(474, 415);
+            button1.Name = "button1";
+            button1.Size = new Size(67, 23);
+            button1.TabIndex = 8;
+            button1.Text = "SendPM";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
+            // userListBox
+            // 
+            userListBox.FormattingEnabled = true;
+            userListBox.ItemHeight = 15;
+            userListBox.Location = new Point(554, 12);
+            userListBox.Name = "userListBox";
+            userListBox.Size = new Size(234, 319);
+            userListBox.TabIndex = 9;
+            // 
+            // mainChatListBox
+            // 
+            mainChatListBox.Dock = DockStyle.Fill;
+            mainChatListBox.FormattingEnabled = true;
+            mainChatListBox.ItemHeight = 15;
+            mainChatListBox.Location = new Point(3, 3);
+            mainChatListBox.Name = "mainChatListBox";
+            mainChatListBox.Size = new Size(510, 334);
+            mainChatListBox.TabIndex = 2;
+            // 
+            // tabControl1
+            // 
+            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPage2);
+            tabControl1.Location = new Point(24, 41);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(524, 368);
+            tabControl1.TabIndex = 10;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(mainChatListBox);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(516, 340);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(listBox3);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(516, 340);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // listBox3
+            // 
+            listBox3.Dock = DockStyle.Fill;
+            listBox3.FormattingEnabled = true;
+            listBox3.ItemHeight = 15;
+            listBox3.Location = new Point(3, 3);
+            listBox3.Name = "listBox3";
+            listBox3.Size = new Size(510, 334);
+            listBox3.TabIndex = 0;
+            // 
+            // imageList1
+            // 
+            imageList1.ColorDepth = ColorDepth.Depth32Bit;
+            imageList1.ImageSize = new Size(16, 16);
+            imageList1.TransparentColor = Color.Transparent;
+            // 
+            // systemLogListBox
+            // 
+            systemLogListBox.FormattingEnabled = true;
+            systemLogListBox.ItemHeight = 15;
+            systemLogListBox.Location = new Point(554, 340);
+            systemLogListBox.Name = "systemLogListBox";
+            systemLogListBox.Size = new Size(234, 94);
+            systemLogListBox.TabIndex = 11;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(systemLogListBox);
+            Controls.Add(tabControl1);
+            Controls.Add(userListBox);
+            Controls.Add(button1);
+            Controls.Add(textBox1);
             Controls.Add(textBoxUsername);
             Controls.Add(textBoxMessage);
             Controls.Add(connect_btn);
             Controls.Add(send_btn);
-            Controls.Add(listBox1);
             Controls.Add(textBoxIp);
             Name = "Form1";
             Text = "Form1";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
+            tabControl1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -110,10 +214,19 @@
         #endregion
 
         private TextBox textBoxIp;
-        private ListBox listBox1;
         private Button send_btn;
         private Button connect_btn;
         private TextBox textBoxMessage;
         private TextBox textBoxUsername;
+        private TextBox textBox1;
+        private Button button1;
+        private ListBox userListBox;
+        private ListBox mainChatListBox;
+        private TabControl tabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
+        private ListBox listBox3;
+        private ImageList imageList1;
+        private ListBox systemLogListBox;
     }
 }
