@@ -23,12 +23,13 @@ namespace Logic
         private bool _isTcpListening = false;
 
         //События для UI
-        public Action<string>? MessageGetEvent; // сообщение участника
-        public Action<string>? PMGetEvent; // сообщение участника
+        public Action<string, string>? MessageGetEvent; // сообщение участника
+        public Action<string, string>? PMGetEvent; // сообщение участника
         public Action<string>? ClientLogEvent;  // сообщение сервера
 
         public Action<List<string>>? UserListUpdatedEvent; // Для ListBox'а
-        public Action<List<Message>>? HistoryReceivedEvent; // Для чата
+        public Action<List<Logic.MessagesFiles.Message>>? HistoryReceivedEvent; // Для чата
+        public Action<string, List<Logic.MessagesFiles.Message>>? HistoryPmReceivedEvent; // Для чата
 
         private bool disposedValue;
 
@@ -50,19 +51,17 @@ namespace Logic
         }
         private void LogMessage(string name, string msg)
         {
-            string fullMsg = $"{name}: {msg}";
             if (ctx != null)
-                ctx.Post(d => MessageGetEvent?.Invoke(fullMsg), null);
+                ctx.Post(d => MessageGetEvent?.Invoke(name, msg), null);
             else
-                MessageGetEvent?.Invoke(fullMsg);
+                MessageGetEvent?.Invoke(name, msg);
         }
         private void LogPmMessage(string name, string msg)
         {
-            string fullMsg = $"{name}: {msg}";
             if (ctx != null)
-                ctx.Post(d => PMGetEvent?.Invoke(fullMsg), null);
+                ctx.Post(d => PMGetEvent?.Invoke(name, msg), null);
             else
-                PMGetEvent?.Invoke(fullMsg);
+                PMGetEvent?.Invoke(name, msg);
         }
 
 
@@ -152,7 +151,21 @@ namespace Logic
                 LogSystem($"Error: {ex.Message}");
             }
         }
-
+        public async Task RequestPrivateHistoryAsync(string withUser)
+        {
+            if (_tcpStream == null || !_isTcpListening) return;
+            try
+            {
+                var req = new PrivateHistoryRequest { WithUser = withUser };
+                string json = JsonSerializer.Serialize(req);
+                byte[] buffer = Encoding.UTF8.GetBytes(json);
+                await _tcpStream.WriteAsync(buffer, 0, buffer.Length);
+            }
+            catch (Exception ex)
+            {
+                LogSystem($"TCP Ошибка запроса истории PM: {ex.Message}");
+            }
+        }
         // TCP Слушатель
         private async Task ListenTcpServerAsync()
         {
@@ -210,9 +223,21 @@ namespace Logic
                             }
                             break;
 
+                        case "PrivateHistory":
+                            var history = JsonSerializer.Deserialize<PrivateHistoryResponse>(serverJson);
+                            if (history?.Messages != null)
+                            {
+                                // Вызываем новое событие
+                                if (ctx != null)
+                                    ctx.Post(d => HistoryPmReceivedEvent?.Invoke(history.WithUser, history.Messages), null);
+                                else
+                                    HistoryPmReceivedEvent?.Invoke(history.WithUser, history.Messages);
+                            }
+                            break;
+
                         case "PrivateMessage":
                             var relayMsg = JsonSerializer.Deserialize<PrivateMessageRelay>(serverJson);
-                            LogPmMessage($"[PM от {relayMsg.FromUser}]", relayMsg.Message);
+                            LogPmMessage(relayMsg.FromUser, relayMsg.Message);
                             break;
                     }
                 }
