@@ -215,7 +215,7 @@ namespace Client
             string selectedUser = userListBox.SelectedItem.ToString();
             string myName = textBoxUsername.Text;
 
-            if (selectedUser == myName) return; // Не чатиться с собой
+            //if (selectedUser == myName) return; // Не чатиться с собой
 
             ListBox chatBox = FindOrCreatePmTab(selectedUser);
 
